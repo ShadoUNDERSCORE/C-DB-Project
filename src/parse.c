@@ -11,11 +11,6 @@
 #include "parse.h"
 
 void output_file(char* filepath, struct dbheader_t* dbhdr, struct employee_t* employees) {
-	// if (fd == 0) {
-	// 	printf("Got a bad File Descriptor from the user.\n");
-	// 	return STATUS_ERROR;		
-	// }
-
 	int fd = open(filepath, O_RDWR | O_TRUNC);
 	int realcount = dbhdr->count;
 
@@ -173,14 +168,22 @@ int delete_employee(struct dbheader_t* dbhdr, struct employee_t* employees, char
 
 int update_employee(struct dbheader_t* dbhdr, struct employee_t* employees, char* queryString, char* updateStrings[]) {
 	int id = find_employee(dbhdr, employees, queryString);
+	if (id == -1) {
+		return STATUS_ERROR;
+	}
 
 	if (updateStrings[0]) {
 		// name	
+		strcpy(employees[id].name, updateStrings[0]);
 	}
 	if (updateStrings[1]) {
 		// hours
+		unsigned int hours_int = atoi(updateStrings[1]);
+		employees[id].hours = hours_int;
 	}
 	if (updateStrings[2]) {
 		// address
+		strcpy(employees[id].address, updateStrings[2]);
 	}
+	return STATUS_SUCCESS;
 }

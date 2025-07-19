@@ -125,7 +125,9 @@ int main(int argc, char *argv[]) {
 			return STATUS_ERROR;
 		}
 		char* update_strings[] = {change_name_string, change_hours_string, change_addr_string};
-		update_employee(dbhdr, employees, update_query_string, update_strings);
+		if (update_employee(dbhdr, employees, update_query_string, update_strings) == STATUS_ERROR) {
+			printf("%s Not found\n", update_query_string);
+		}
 	}
 
 	if (list) {
