@@ -16,11 +16,14 @@ struct employee_t {
 	unsigned int hours;
 };
 
-int create_db_header(int fd, struct dbheader_t** headerout);
-int validate_db_header(int fd, struct dbheader_t** headerout);
-int read_employees(int fd, struct dbheader_t*, struct employee_t **employeesout);
-int add_employee(struct dbheader_t*, struct employee_t*, char* addstring);
-void output_file(int fd, struct dbheader_t*, struct employee_t*);
+int create_db_header(int fd, struct dbheader_t** headerOut);
+int validate_db_header(int fd, struct dbheader_t** headerOut);
+int read_employees(int fd, struct dbheader_t*, struct employee_t **employeesOut);
+int add_employee(struct dbheader_t*, struct employee_t*, char* addString);
+int delete_employee(struct dbheader_t*, struct employee_t*, char* delQueryString);
+int update_employee(struct dbheader_t*, struct employee_t*, char* queryString, char* updateStrings[]);
+void output_file(char* filepath, struct dbheader_t*, struct employee_t*);
 void list_employees(struct dbheader_t*, struct employee_t*);
+
 
 #endif

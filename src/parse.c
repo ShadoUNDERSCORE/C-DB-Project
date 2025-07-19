@@ -5,16 +5,18 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <fcntl.h>
 
 #include "common.h"
 #include "parse.h"
 
-void output_file(int fd, struct dbheader_t* dbhdr, struct employee_t* employees) {
-	if (fd == 0) {
-		printf("Got a bad File Descriptor from the user.\n");
-		return STATUS_ERROR;		
-	}
+void output_file(char* filepath, struct dbheader_t* dbhdr, struct employee_t* employees) {
+	// if (fd == 0) {
+	// 	printf("Got a bad File Descriptor from the user.\n");
+	// 	return STATUS_ERROR;		
+	// }
 
+	int fd = open(filepath, O_RDWR | O_TRUNC);
 	int realcount = dbhdr->count;
 
 	dbhdr->magic = htonl(dbhdr->magic);
@@ -96,23 +98,6 @@ int validate_db_header(int fd, struct dbheader_t** headerOut) {
 	*headerOut = header;
 }
 
-int add_employee(struct dbheader_t* dbhdr, struct employee_t* employees, char* addstring) {
-	printf("%s\n", addstring);
-
-	char* name = strtok(addstring, ",");
-	char* addr = strtok(NULL, ",");
-	char* hours = strtok(NULL, ",");
-
-	printf("%s %s %s\n", name, addr, hours);
-
-	strncpy(employees[dbhdr->count-1].name, name, sizeof(employees[dbhdr->count-1].name));
-	strncpy(employees[dbhdr->count-1].address, addr, sizeof(employees[dbhdr->count-1].address));
-
-	employees[dbhdr->count-1].hours = atoi(hours);
-
-	return STATUS_SUCCESS;
-}
-
 int read_employees(int fd, struct dbheader_t * dbhdr, struct employee_t **employeesOut) {
 	if (fd < 0) {
 		printf("Got a bad File Descriptor from the user.\n");
@@ -138,6 +123,20 @@ int read_employees(int fd, struct dbheader_t * dbhdr, struct employee_t **employ
 	return STATUS_SUCCESS;
 }
 
+int add_employee(struct dbheader_t* dbhdr, struct employee_t* employees, char* addstring) {
+
+	char* name = strtok(addstring, ",");
+	char* addr = strtok(NULL, ",");
+	char* hours = strtok(NULL, ",");
+
+	strncpy(employees[dbhdr->count-1].name, name, sizeof(employees[dbhdr->count-1].name));
+	strncpy(employees[dbhdr->count-1].address, addr, sizeof(employees[dbhdr->count-1].address));
+
+	employees[dbhdr->count-1].hours = atoi(hours);
+
+	return STATUS_SUCCESS;
+}
+
 void list_employees(struct dbheader_t* dbhdr, struct employee_t* employees) {
 	int i = 0;
 	for (; i < dbhdr->count; i++) {
@@ -145,5 +144,43 @@ void list_employees(struct dbheader_t* dbhdr, struct employee_t* employees) {
 		printf("\tName: %s\n", employees[i].name);
 		printf("\tAddress: %s\n", employees[i].address);
 		printf("\tHours Worked: %d\n", employees[i].hours);
+	}
+}
+
+int find_employee(struct dbheader_t* dbhdr, struct employee_t* employees, char* query) {
+	int i = 0;
+	for (; i < dbhdr->count; i++) {
+		if (strcmp(employees[i].name, query) == 0) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+int delete_employee(struct dbheader_t* dbhdr, struct employee_t* employees, char* delQueryString) {
+	int id = find_employee(dbhdr, employees, delQueryString);
+	if (id == -1) {
+		return STATUS_ERROR;
+	}
+
+	for (; id < dbhdr->count; id++) {
+		employees[id] = employees[id + 1];
+	}
+	dbhdr->count--;
+
+	return STATUS_SUCCESS;
+}
+
+int update_employee(struct dbheader_t* dbhdr, struct employee_t* employees, char* queryString, char* updateStrings[]) {
+	int id = find_employee(dbhdr, employees, queryString);
+
+	if (updateStrings[0]) {
+		// name	
+	}
+	if (updateStrings[1]) {
+		// hours
+	}
+	if (updateStrings[2]) {
+		// address
 	}
 }
